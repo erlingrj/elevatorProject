@@ -77,7 +77,6 @@ func RunBackupProcess() {
 		} else {
 			i = 0
 			time.Sleep(200 * time.Millisecond)
-
 		}
 	}
 	//Lost conneciton to primary.

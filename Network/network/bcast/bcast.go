@@ -4,6 +4,7 @@ import (
 	"elevatorProject/Network/network/conn"
 	"encoding/json"
 	"fmt"
+	//"math/rand"
 	"net"
 	"reflect"
 	"strings"
@@ -48,6 +49,10 @@ func Receiver(port int, chans ...interface{}) {
 	for {
 		n, _, _ := conn.ReadFrom(buf[0:])
 		for _, ch := range chans {
+			//if rand.Float32() < 0.15 {
+			//	fmt.Println("Package lost")
+			//	break
+			//}
 			T := reflect.TypeOf(ch).Elem()
 			typeName := T.String()
 			if strings.HasPrefix(string(buf[0:n])+"{", typeName) {

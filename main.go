@@ -56,24 +56,25 @@ func main() {
 		select {
 
 		case msg1 := <-arriveAtFloorCh:
-			//fsmArriveAtFloor(msg)
 			ElevatorMasterList = EventController.ArriveAtFloor(ElevatorMasterList, msg1, startTimer, updateElevatorTxCh)
+			Utilities.PrintOrderList(ElevatorMasterList)
 
 		case msg2 := <-externalButtonCh:
-			//elevatorData = fsmExternalButtonPressed(elevatorData, msg)
-			//Utilities.PrintOrderList(ElevatorMasterList)
 			ElevatorMasterList = EventController.ExternalButtonPressed(ElevatorMasterList, msg2, newOrderTxCh, updateElevatorTxCh, startTimer)
+			fmt.Printf("External button pressed\n")
+			fmt.Printf("-------------------------------------------------------------\n")
 
 		case msg3 := <-internalButtonCh:
-			//Utilities.PrintOrderList(ElevatorMasterList)
 			ElevatorMasterList = EventController.InternalButtonPressed(ElevatorMasterList, msg3, updateElevatorTxCh, startTimer)
+			fmt.Printf("Internal button pressed\n")
+			fmt.Printf("-------------------------------------------------------------\n")
+
 		case msg4 := <-updateElevatorRxCh:
 			ElevatorMasterList = EventController.ElevatorDataReceivedFromNetwork(msg4, ElevatorMasterList, updateElevatorTxCh)
 
 		case msg5 := <-newOrderRxCh:
 			ElevatorMasterList = EventController.OrderReceivedFromNetwork(msg5, ElevatorMasterList, updateElevatorTxCh)
 
-			//elevatorData = OrderReceivedOrder(elevatorData, msg)
 		case msg6 := <-peerUpdateCh:
 			fmt.Println(msg6)
 			ElevatorMasterList = EventController.ElevatorPeerUpdateFromNetwork(ElevatorMasterList, msg6, updateElevatorTxCh, newOrderTxCh)

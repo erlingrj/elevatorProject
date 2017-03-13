@@ -27,7 +27,6 @@ func GetMacAddr() string {
 		currentNetworkHardwareName = interf.Name
 
 	}
-
 	// extract the hardware information base on the interface name
 	// capture above
 	netInterface, err := net.InterfaceByName(currentNetworkHardwareName)
@@ -56,9 +55,9 @@ func PrintOrderList(elevatorDataList [N_ELEVATORS]ElevatorData) {
 	}
 	fmt.Printf("-------------------------------------------------------------")
 	fmt.Printf("\n")
-	fmt.Printf("Direction: %d", MotorDirection(elevatorDataList[0].Direction))
+	fmt.Printf("Direction:	%d", MotorDirection(elevatorDataList[0].Direction))
 	fmt.Printf("\n")
-	fmt.Println("Floor: ", elevatorDataList[0].Floor)
+	fmt.Printf("Floor:		%d", elevatorDataList[0].Floor)
 	fmt.Printf("\n")
 	fmt.Printf("-------------------------------------------------------------")
 	fmt.Printf("\n")
