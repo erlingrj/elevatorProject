@@ -1,7 +1,6 @@
 package ElevatorController
 
 import (
-	//"elevatorProject/OrderController"
 	. "elevatorProject/Driver"
 )
 
@@ -21,25 +20,28 @@ func SetAllLights(elevatorDataList [N_ELEVATORS]ElevatorData) {
 }
 
 func RemoveCompletedOrders(elevatorDataList [N_ELEVATORS]ElevatorData) [N_ELEVATORS]ElevatorData {
+
 	switch elevatorDataList[0].Direction {
 
 	case DirnUp:
 
+		if NoOrdersAboveCurrentFloor(elevatorDataList[0]) {
+			elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallDown] = 0 //hvis de som skal opp ikke trykker videre, slettes denne, og det er litt uheldig
+		} else if NoOrdersBelowCurrentFloor(elevatorDataList[0]) && elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallUp] == 0 {
+			elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallDown] = 0 //hvis de som skal opp ikke trykker videre, slettes denne, og det er litt uheldig
+		}
 		elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallUp] = 0
 		elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonInternal] = 0
 
-		if NoOrdersAboveCurrentFloor(elevatorDataList[0]) {
-			elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallDown] = 0 //hvis de som skal opp ikke trykker videre, slettes denne, og det er litt uheldig
-		}
-
 	case DirnDown:
-
-		elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallDown] = 0
-		elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonInternal] = 0
 
 		if NoOrdersBelowCurrentFloor(elevatorDataList[0]) {
 			elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallUp] = 0
+		} else if NoOrdersAboveCurrentFloor(elevatorDataList[0]) && elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallDown] == 0 {
+			elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallUp] = 0
 		}
+		elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallDown] = 0
+		elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonInternal] = 0
 
 	case DirnStop:
 		if NoOrdersBelowCurrentFloor(elevatorDataList[0]) {
@@ -49,9 +51,7 @@ func RemoveCompletedOrders(elevatorDataList [N_ELEVATORS]ElevatorData) [N_ELEVAT
 			elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonCallUp] = 0
 		}
 		elevatorDataList[0].Orders[elevatorDataList[0].Floor][ButtonInternal] = 0
-
 	}
-	//ExternalOrders.UpdateElevatorData(elevatorDataList[0])
 	return elevatorDataList
 }
 
@@ -65,7 +65,6 @@ func GetNextDirection(elevatorData ElevatorData) ElevatorData {
 	switch elevatorData.Direction {
 
 	case DirnUp:
-
 		if NoOrdersAboveCurrentFloor(elevatorData) {
 			elevatorData.Direction = DirnDown
 		} else {
@@ -73,7 +72,6 @@ func GetNextDirection(elevatorData ElevatorData) ElevatorData {
 		}
 
 	case DirnDown:
-
 		if NoOrdersBelowCurrentFloor(elevatorData) {
 			elevatorData.Direction = DirnUp
 		} else {
@@ -81,25 +79,23 @@ func GetNextDirection(elevatorData ElevatorData) ElevatorData {
 		}
 
 	case DirnStop:
-
 		if NoOrdersAtCurrentFloor(elevatorData) {
 			if NoOrdersBelowCurrentFloor(elevatorData) {
 				elevatorData.Direction = DirnUp
-			} else {
+			} else if NoOrdersAboveCurrentFloor(elevatorData) {
 				elevatorData.Direction = DirnDown
 			}
-
 		} else if elevatorData.Status != StatusDoorOpen {
-			if elevatorData.Floor != 0 {
+
+			if NoOrdersAboveCurrentFloor(elevatorData) && !NoOrdersBelowCurrentFloor(elevatorData) {
 				elevatorData.Direction = DirnDown
-			} else {
+			} else if !NoOrdersAboveCurrentFloor(elevatorData) && NoOrdersBelowCurrentFloor(elevatorData) {
 				elevatorData.Direction = DirnUp
 			}
 		}
 	}
 
 end:
-	//ExternalOrders.UpdateElevatorData(elevatorDataList[0])
 	return elevatorData
 }
 
@@ -122,7 +118,6 @@ func CheckIfShouldStop(elevatorData ElevatorData) bool {
 
 	case DirnStop:
 		return true
-
 	}
 	return false
 }

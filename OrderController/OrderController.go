@@ -1,7 +1,6 @@
 package OrderController
 
 import (
-	//	. "elevatorProject/Network/network/peers"
 	. "elevatorProject/Driver"
 	"elevatorProject/Utilities"
 )
@@ -30,33 +29,60 @@ func PlaceExternalOrder(elevatorDataList [N_ELEVATORS]ElevatorData, order Elevat
 }
 
 func CalculateSingleElevatorCost(elevator ElevatorData, order ElevatorOrder) int {
+	numberOfStops := 0
+
 	if (int(elevator.Direction) == -1 && int(order.Direction) == 1) || (int(elevator.Direction) == 1 && int(order.Direction) == 0) {
 		switch elevator.Direction {
 		case DirnUp:
+			for i := order.Floor; i < N_FLOORS; i++ {
+				numberOfStops = numberOfStops + elevator.Orders[i][0] + elevator.Orders[i][1] + elevator.Orders[i][2]
+				if (elevator.Orders[i][0] == 1 || elevator.Orders[i][1] == 1) && elevator.Orders[i][2] == 1 {
+					numberOfStops = numberOfStops - 1
+				}
+			}
+
 			if order.Floor > elevator.Floor {
-				return order.Floor - elevator.Floor
+				return order.Floor - elevator.Floor + numberOfStops
 			} else {
-				return (elevator.Floor-1)*2 + (elevator.Floor - order.Floor)
+				return (elevator.Floor-1)*2 + (elevator.Floor - order.Floor) + numberOfStops
 			}
 		case DirnDown:
+			for i := order.Floor; i >= 0; i-- {
+				numberOfStops = numberOfStops + elevator.Orders[i][0] + elevator.Orders[i][1] + elevator.Orders[i][2]
+				if (elevator.Orders[i][0] == 1 || elevator.Orders[i][1] == 1) && elevator.Orders[i][2] == 1 {
+					numberOfStops = numberOfStops - 1
+				}
+			}
 			if order.Floor < elevator.Floor {
-				return elevator.Floor - order.Floor
+				return elevator.Floor - order.Floor + numberOfStops
 			} else {
-				return (elevator.Floor-1)*2 + (order.Floor - elevator.Floor)
+				return (elevator.Floor-1)*2 + (order.Floor - elevator.Floor) + numberOfStops
 			}
 		}
 	} else {
 		switch elevator.Direction {
 		case DirnUp:
-			return 2*N_FLOORS - elevator.Floor - order.Floor
+			for i := order.Floor; i < N_FLOORS; i++ {
+				numberOfStops = numberOfStops + elevator.Orders[i][0] + elevator.Orders[i][1] + elevator.Orders[i][2]
+				if (elevator.Orders[i][0] == 1 || elevator.Orders[i][1] == 1) && elevator.Orders[i][2] == 1 {
+					numberOfStops = numberOfStops - 1
+				}
+			}
+			return 2*N_FLOORS - elevator.Floor - order.Floor + numberOfStops
 		case DirnDown:
-			return (elevator.Floor - 1) + (order.Floor - 1)
+			for i := order.Floor; i >= 0; i-- {
+				numberOfStops = numberOfStops + elevator.Orders[i][0] + elevator.Orders[i][1] + elevator.Orders[i][2]
+				if (elevator.Orders[i][0] == 1 || elevator.Orders[i][1] == 1) && elevator.Orders[i][2] == 1 {
+					numberOfStops = numberOfStops - 1
+				}
+			}
+			return (elevator.Floor - 1) + (order.Floor - 1) + numberOfStops
 		case DirnStop:
 			distance := elevator.Floor - order.Floor
 			if distance >= 0 {
-				return distance
+				return distance + numberOfStops
 			}
-			return -distance
+			return -distance + numberOfStops
 		}
 	}
 	return -1
@@ -66,7 +92,6 @@ func FindBestElevator(elevatorDataList [N_ELEVATORS]ElevatorData, order Elevator
 	var minCost = 100000
 	var ID string
 
-	//var elevatorNumber = -1 //kanksje fint å bruke ID her?
 	for i := 0; i < N_ELEVATORS; i++ {
 		if elevatorDataList[i].Initiated {
 			var thisCost = CalculateSingleElevatorCost(elevatorDataList[i], order)
@@ -76,12 +101,10 @@ func FindBestElevator(elevatorDataList [N_ELEVATORS]ElevatorData, order Elevator
 			}
 		}
 	}
-	return ID //kan bare bruke ID-en til ordren
+	return ID
 }
 
-//tror det er best om bare en av heisene omfordeler ordre
-
-func RedestributeExternalOrders(elevatorDataList [N_ELEVATORS]ElevatorData, lostElevator ElevatorData, newOrderCh chan ElevatorOrder, updateElevatorDataCh chan ElevatorData) {
+func RedistributeExternalOrders(elevatorDataList [N_ELEVATORS]ElevatorData, lostElevator ElevatorData, newOrderCh chan ElevatorOrder, updateElevatorDataCh chan ElevatorData) {
 
 	if Utilities.AmIMaster(elevatorDataList) == true {
 

@@ -21,7 +21,7 @@ var ButtonChannels = [N_FLOORS][N_BUTTONS]int{
 func InitElevator() {
 	success := IoInit()
 	if success == 0 {
-		//panic("Unable to initialize elevator hardware!")
+		panic("Unable to initialize elevator hardware!")
 	}
 	for i := 0; i < N_FLOORS; i++ {
 		for b := ButtonType(0); b < N_BUTTONS; b++ {
@@ -165,18 +165,15 @@ func GetObstructionSignal() int {
 	return IoReadBit(OBSTRUCTION)
 }
 
-func GetOpenDoor() int { //Sjekk om denne funker!!
+func GetOpenDoor() int {
 	return IoReadBit(LIGHT_STOP)
 }
 
 func ReadFloorSensors(arriveAtFloorCh chan int) {
 
 	currentFloor := GetFloorSensorSignal()
-	//Lager variabel for å unngå å oppfatte tastetrykk flere ganger
-	//lastButtonPressed := -1
 
 	for {
-		//Vi ønsker kun beskjed hvis vi når en NY etasje! SKRIV DENNE PÅ EN BEDRE MÅTE, VI GJØR TRE KALL TIL GETFLOORSENSORSIGNAL
 		if GetFloorSensorSignal() != currentFloor && GetFloorSensorSignal() >= 0 {
 			currentFloor = GetFloorSensorSignal()
 			arriveAtFloorCh <- currentFloor
@@ -189,8 +186,6 @@ func ReadFloorSensors(arriveAtFloorCh chan int) {
 
 	}
 
-	//Dette er egentlig alt denne funksjonen bør gjøre. Vi må finne på en god løsning på utfordringen av polling av knapper. Hvordan fungerer det egentlig?
-	//Vil vi sende 1000 beskjeder om trykket inn knapp dersom en knapp holdes inn i 100ms?? MEst sannsynlig ikke
 }
 
 func ReadButtonSensors(externalButtonCh chan ElevatorOrder, internalButtonCh chan int) {
@@ -198,28 +193,19 @@ func ReadButtonSensors(externalButtonCh chan ElevatorOrder, internalButtonCh cha
 		for i := 0; i < N_FLOORS; i++ {
 			for j := 0; j < 2; j++ {
 				if GetOrderButtonSignal(ButtonType(j), i) == 1 {
-					//if lastButtonPressed != 2*i+j {
-					//lastButtonPressed = 2*i + j
 
 					externalButtonCh <- ElevatorOrder{i, j, "-1"}
 					time.Sleep(500 * time.Millisecond)
-					//goto cont
 
 				}
 			}
 		}
-
 		//Looper gjennom alle INTERNE knapper
-
 		for i := 0; i < N_FLOORS; i++ {
 			if GetOrderButtonSignal(ButtonType(2), i) == 1 {
-				//if lastButtonPressed != N_FLOORS*2+i {
-				//	lastButtonPressed = N_FLOORS*2 + i
 
 				internalButtonCh <- i
 				time.Sleep(500 * time.Millisecond)
-				//Send info på internalButtonCh
-				//goto cont
 
 			}
 		}

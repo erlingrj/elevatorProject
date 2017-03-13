@@ -9,16 +9,11 @@ import (
 	"fmt"
 )
 
-//Funksjoner som skal legges til ORDER MODULEN
-//------------------------------------------------------------------------------------------------------------
-
 func ArriveAtFloor(elevatorDataList [N_ELEVATORS]ElevatorData, floor int, startTimer chan TimerType, updateElevatorTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {
 
 	if floor == -1 {
 		//Vi har forlatt en etasje, starter timeren
 		startTimer <- TimerType(TimeToReachFloor)
-		//elevatorData = RemoveCompletedOrders(elevatorData)
-		//ElevatorController.SetAllLights(elevatorData, AllExternalOrders())
 	} else {
 
 		startTimer <- TimerType(TimeFloorReached)
@@ -29,16 +24,9 @@ func ArriveAtFloor(elevatorDataList [N_ELEVATORS]ElevatorData, floor int, startT
 			elevatorDataList[0].Status = StatusDoorOpen
 			SetMotorDirection(DirnStop)
 			SetDoorOpenLamp(1)
-			//elevatorData = OpenDoors(elevatorData)
 			startTimer <- TimerType(TimeToOpenDoors)
 			updateElevatorTxCh <- elevatorDataList[0]
-
-			//elevatorData = RemoveCompletedOrders(elevatorData)
 		}
-
-		//ExternalOrders.UpdateElevatorData(elevatorDataList[0])
-		//ElevatorController.SetAllLights(elevatorData, AllExternalOrders())
-
 	}
 	return elevatorDataList
 }
@@ -56,11 +44,6 @@ func ExternalButtonPressed(elevatorDataList [N_ELEVATORS]ElevatorData, order Ele
 		SetMotorDirection(elevatorDataList[0].Direction)
 	}
 
-	//	if elevatorDataList.Status == StatusIdle && elevatorDataList.Statys {}
-
-	//	if elevatorDataList.Status == StatusIdle && elevatorDataList.Statys {}
-
-	//OrderController.UpdateElevatorData(elevatorDataList[0])
 	ElevatorController.SetAllLights(elevatorDataList)
 
 	return elevatorDataList
@@ -70,10 +53,12 @@ func ExternalButtonPressed(elevatorDataList [N_ELEVATORS]ElevatorData, order Ele
 func LeaveFloor(elevatorDataList [N_ELEVATORS]ElevatorData, updateElevatorTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {
 	elevatorDataList[0].Status = StatusIdle
 	elevatorDataList[0] = ElevatorController.GetNextDirection(elevatorDataList[0])
+	fmt.Println("DIRECTION1: ", elevatorDataList[0].Direction)
 	elevatorDataList = ElevatorController.RemoveCompletedOrders(elevatorDataList)
 	SetDoorOpenLamp(0)
 	ElevatorController.SetAllLights(elevatorDataList)
 	elevatorDataList[0] = ElevatorController.GetNextDirection(elevatorDataList[0])
+	fmt.Println("DIRECTION2: ", elevatorDataList[0].Direction)
 	SetMotorDirection(elevatorDataList[0].Direction)
 	updateElevatorTxCh <- elevatorDataList[0]
 	ElevatorController.SetAllLights(elevatorDataList)
@@ -89,15 +74,11 @@ func InternalButtonPressed(elevatorDataList [N_ELEVATORS]ElevatorData, floor int
 		if elevatorDataList[0].Floor == floor {
 			elevatorDataList = ArriveAtFloor(elevatorDataList, floor, startTimer, updateElevatorTxCh)
 		} else {
-			//fmt.Println("Internal")
 			elevatorDataList[0] = ElevatorController.GetNextDirection(elevatorDataList[0])
 			SetMotorDirection(elevatorDataList[0].Direction)
-			//elevatorData = RemoveCompletedOrders(elevatorData)
-			//ElevatorController.SetAllLights(elevatorData, AllOrderController())
 		}
 
 	}
-	//UpdateElevatorData(elevatorData)
 	ElevatorController.SetAllLights(elevatorDataList)
 
 	return elevatorDataList
@@ -107,7 +88,6 @@ func InternalButtonPressed(elevatorDataList [N_ELEVATORS]ElevatorData, floor int
 func ElevatorDataReceivedFromNetwork(elevatorDataRx ElevatorData, elevatorDataList [N_ELEVATORS]ElevatorData, elevatorUpdateTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {
 
 	if elevatorDataRx.ID == elevatorDataList[0].ID && elevatorDataRx.ForceUpdate == true {
-		//Another elevator wants to overwrite our internal order due to network loss
 
 		//Appending internal orders
 		for i := 0; i < N_FLOORS; i++ {
@@ -118,22 +98,20 @@ func ElevatorDataReceivedFromNetwork(elevatorDataRx ElevatorData, elevatorDataLi
 
 		elevatorDataList[0] = ElevatorController.GetNextDirection(elevatorDataList[0])
 		SetMotorDirection(elevatorDataList[0].Direction)
-		fmt.Println("Internal orders from network")
 		//Sending a message back to inform that we have successfully updated our orderqueue
 		elevatorUpdateTxCh <- elevatorDataList[0]
 		elevatorDataList[0].ForceUpdate = false
 
 	} else if elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)].ForceUpdate == true {
 		//We have sent internal orders to this elevator, check if they have been received
-		fmt.Println("Internal orders to other elevator check")
-		check := true
+		pkgRecvCheck := true
 		for i := 0; i < N_FLOORS; i++ {
 			if elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)].Orders[i][2] == 1 && elevatorDataRx.Orders[i][2] == 0 {
-				check = false
+				pkgRecvCheck = false
 			}
 		}
 
-		if check == false {
+		if pkgRecvCheck == false {
 			//Resend the update
 
 			elevatorUpdateTxCh <- elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)]
@@ -143,9 +121,7 @@ func ElevatorDataReceivedFromNetwork(elevatorDataRx ElevatorData, elevatorDataLi
 			elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)] = elevatorDataRx
 		}
 	} else if elevatorDataRx.ID != elevatorDataList[0].ID {
-		fmt.Println("Other elevator")
 		elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)] = elevatorDataRx
-		//ExternalOrders.UpdateElevatorData(elevatorDataRx)
 	}
 
 	ElevatorController.SetAllLights(elevatorDataList)
@@ -165,8 +141,6 @@ func OrderReceivedFromNetwork(order ElevatorOrder, elevatorDataList [N_ELEVATORS
 			elevatorDataList[0] = ElevatorController.GetNextDirection(elevatorDataList[0])
 			SetMotorDirection(elevatorDataList[0].Direction)
 		}
-
-		//ExternalOrders.UpdateElevatorData(elevatorDataList[0])
 		ElevatorController.SetAllLights(elevatorDataList)
 
 	}
@@ -185,7 +159,7 @@ func ElevatorPeerUpdateFromNetwork(elevatorDataList [N_ELEVATORS]ElevatorData, o
 
 	if onlineElevatorList.New == "" {
 		fmt.Println("Lost elevator")
-		OrderController.RedestributeExternalOrders(elevatorDataList, elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, onlineElevatorList.Lost[len(onlineElevatorList.Lost)-1])], newOrderCh, updateElevatorTxCh)
+		OrderController.RedistributeExternalOrders(elevatorDataList, elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, onlineElevatorList.Lost[len(onlineElevatorList.Lost)-1])], newOrderCh, updateElevatorTxCh)
 	}
 
 	if onlineElevatorList.New != "" {
@@ -212,9 +186,6 @@ func ElevatorPeerUpdateFromNetwork(elevatorDataList [N_ELEVATORS]ElevatorData, o
 
 		}
 	}
-	//Lost connection to all other Elevators
-	//Initialize reboot
-
 	return elevatorDataList
 
 }
@@ -225,6 +196,7 @@ func TimeOut(elevatorDataList [N_ELEVATORS]ElevatorData, timeout TimerType, upda
 		elevatorDataList = LeaveFloor(elevatorDataList, updateElevatorTxCh)
 	} else if timeout == TimeToReachFloor {
 		SetMotorDirection(DirnStop)
+		//START TIMEREN PÅ NYTT OG PRØV IGJEN. GJØR DETTE TIL DET GÅR? ELLER GJØR DET FOR EKSEMPEL 3 GANGER OG SÅ START PÅ NYTT
 		panic("Cant reach floor, sensor/engine error!")
 	}
 
