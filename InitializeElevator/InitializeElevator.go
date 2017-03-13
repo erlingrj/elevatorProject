@@ -1,6 +1,8 @@
 package InitializeElevator
 
 import (
+	"elevatorProject/Utilities"
+	. "elevatorProject/driver"
 	"fmt"
 	"log"
 	"net"
@@ -24,13 +26,14 @@ func InitializeElevator() ElevatorData {
 	}
 	var initializedData ElevatorData
 
-	initializedData.ID = Utilities.getMacAddr()
+	initializedData.ID = Utilities.GetMacAddr()
 	initializedData.Floor = GetFloorSensorSignal()
 	initializedData.Direction = GetMotorDirection()
 	initializedData.Status = 0
 	initializedData.Initiated = true
 	initializedData.ForceUpdate = false
 	initializedData.ScheduledReboot = false
+	SetFloorIndicator(initializedData.Floor)
 
 	return initializedData
 
@@ -67,6 +70,7 @@ func RunBackupProcess() {
 
 		if udpshit != nil {
 		}
+
 		if err != nil {
 			i++
 			time.Sleep(200 * time.Millisecond)
@@ -99,9 +103,9 @@ func RunPrimaryProcess() {
 
 	msg := []byte("I AM ALIVE")
 
-	for i := 0; i < 5; {
+	for {
 		udpBroadcast.WriteTo(msg, addr)
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 
 	}
 

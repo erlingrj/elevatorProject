@@ -4,12 +4,12 @@ package main
 
 import (
 	//"fmt"
-	"elevatorProject/ElevatorController"
+	//"elevatorProject/ElevatorController"
 	"elevatorProject/EventController"
 	"elevatorProject/InitializeElevator"
 	"elevatorProject/Network"
 	. "elevatorProject/Network/network/peers"
-	"elevatorProject/OrderController"
+	//"elevatorProject/OrderController"
 	"elevatorProject/Timer"
 	"elevatorProject/Utilities"
 	. "elevatorProject/driver"
@@ -25,7 +25,6 @@ func main() {
 
 	elevatorData := InitializeElevator.InitializeElevator()
 	ElevatorMasterList := InitializeElevator.InitializeElevatorList()
-
 	ElevatorMasterList[0] = elevatorData
 
 	updateElevatorRxCh := make(chan ElevatorData, 500)
@@ -44,6 +43,8 @@ func main() {
 	externalButtonCh := make(chan ElevatorOrder, 50)
 	internalButtonCh := make(chan int, 50)
 
+	Utilities.PrintOrderList(ElevatorMasterList)
+
 	go Network.RunNetwork(elevatorData, updateElevatorTxCh, updateElevatorRxCh, newOrderTxCh, newOrderRxCh, peerUpdateCh, peerTxEnableCh)
 
 	go ReadFloorSensors(arriveAtFloorCh)
@@ -56,7 +57,8 @@ func main() {
 
 		case msg1 := <-arriveAtFloorCh:
 			//fsmArriveAtFloor(msg)
-			ElevatorMasterList = EventController.ArriveAtFloor(ElevatorMasterList, msg1, startTimer)
+			Utilities.PrintOrderList(ElevatorMasterList)
+			ElevatorMasterList = EventController.ArriveAtFloor(ElevatorMasterList, msg1, startTimer, updateElevatorTxCh)
 
 		case msg2 := <-externalButtonCh:
 			//elevatorData = fsmExternalButtonPressed(elevatorData, msg)
@@ -64,9 +66,10 @@ func main() {
 
 		case msg3 := <-internalButtonCh:
 			ElevatorMasterList = EventController.InternalButtonPressed(ElevatorMasterList, msg3, updateElevatorTxCh, startTimer)
+			Utilities.PrintOrderList(ElevatorMasterList)
 
 		case msg4 := <-updateElevatorRxCh:
-			ElevatorMasterList = EventController.ElevatorDataReceivedFromNetwork(msg4, ElevatorMasterList)
+			ElevatorMasterList = EventController.ElevatorDataReceivedFromNetwork(msg4, ElevatorMasterList, updateElevatorTxCh)
 
 		case msg5 := <-newOrderRxCh:
 			ElevatorMasterList = EventController.OrderReceivedFromNetwork(msg5, ElevatorMasterList, updateElevatorTxCh)

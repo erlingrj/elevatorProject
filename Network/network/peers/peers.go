@@ -1,8 +1,8 @@
 package peers
 
 import (
+	"elevatorProject/Network/network/conn"
 	"fmt"
-	"heisprosjekt/Network/network/conn"
 	"net"
 	"sort"
 	"time"

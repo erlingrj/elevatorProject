@@ -1,5 +1,7 @@
 package driver
 
+import "time"
+
 const MOTOR_SPEED = 2800
 
 var ButtonLightChannels = [N_FLOORS][N_BUTTONS]int{

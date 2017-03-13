@@ -1,9 +1,9 @@
 package Network
 
 import (
-  "heisprosjekt/Network/network/bcast"
-  "heisprosjekt/Network/network/peers"
-  . "heisprosjekt/driver"
+  "elevatorProject/Network/network/bcast"
+  "elevatorProject/Network/network/peers"
+  . "elevatorProject/driver"
   //"flag"
   //"os"
   //"strconv"
@@ -25,8 +25,7 @@ func RunNetwork(elevatorData ElevatorData, updateTxCh chan ElevatorData, updateR
   go bcast.Transmitter(11568, orderTxCh)
   go bcast.Receiver(11568, orderRxCh)
 
-  select {
-  }
+  select {}
 }
 
 /*

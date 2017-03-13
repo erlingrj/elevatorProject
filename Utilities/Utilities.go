@@ -1,7 +1,7 @@
 package Utilities
 
 import (
-	. "elevatorProject/Network/network/peers"
+	//. "elevatorProject/Network/network/peers"
 	. "elevatorProject/driver"
 	"fmt"
 	"net"
@@ -18,7 +18,7 @@ func AmIMaster(elevatorDataList [N_ELEVATORS]ElevatorData) bool {
 	return true
 }
 
-func getMacAddr() string {
+func GetMacAddr() string {
 
 	var currentNetworkHardwareName string
 
@@ -58,6 +58,8 @@ func PrintOrderList(elevatorDataList [N_ELEVATORS]ElevatorData) {
 	fmt.Printf("-------------------------------------------------------------")
 	fmt.Printf("\n")
 	fmt.Printf("Direction: %d", MotorDirection(elevatorDataList[0].Direction))
+	fmt.Printf("\n")
+	fmt.Println("Floor: ", elevatorDataList[0].Floor)
 	fmt.Printf("\n")
 	fmt.Printf("-------------------------------------------------------------")
 	fmt.Printf("\n")

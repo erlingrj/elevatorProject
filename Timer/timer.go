@@ -1,11 +1,11 @@
 package Timer
 
 import (
-  . "heisprosjekt/driver"
+  . "elevatorProject/driver"
   "time"
 )
 
-const openDoorTime = 1
+const openDoorTime = 3
 const reachingFloorTime = 3
 
 func RunTimer(timeout chan TimerType, startTimer chan TimerType) {

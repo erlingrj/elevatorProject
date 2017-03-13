@@ -1,9 +1,9 @@
 package bcast
 
 import (
+	"elevatorProject/Network/network/conn"
 	"encoding/json"
 	"fmt"
-	"heisprosjekt/Network/network/conn"
 	"net"
 	"reflect"
 	"strings"

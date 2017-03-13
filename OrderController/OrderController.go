@@ -1,10 +1,9 @@
 package OrderController
 
 import (
-	. "elevatorProject/Network/network/peers"
+	//	. "elevatorProject/Network/network/peers"
 	"elevatorProject/Utilities"
 	. "elevatorProject/driver"
-	"fmt"
 )
 
 func PlaceInternalOrder(elevatorDataList [N_ELEVATORS]ElevatorData, floor int, updateElevatorTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {
@@ -22,17 +21,10 @@ func PlaceExternalOrder(elevatorDataList [N_ELEVATORS]ElevatorData, order Elevat
 		elevatorDataList[0].Orders[order.Floor][order.Direction] = 1
 
 		//Sender oppdatert informasjon på nettverket
-		fmt.Println("kom2")
 		updateElevatorTxCh <- elevatorDataList[0]
 
-		fmt.Println("kom hit1")
-
 	} else {
-		fmt.Println("kom3")
-
 		newOrderTxCh <- order
-		fmt.Println("kom3")
-
 	}
 	return elevatorDataList
 }

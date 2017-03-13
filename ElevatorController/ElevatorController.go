@@ -1,17 +1,19 @@
 package ElevatorController
 
 import (
-	"fmt"
-
-	"elevatorProject/OrderController"
+	//"elevatorProject/OrderController"
 	. "elevatorProject/driver"
 )
 
 func SetAllLights(elevatorDataList [N_ELEVATORS]ElevatorData) {
-	for k := 0; k < N_ELEVATORS-1; k++ {
+	for k := 0; k < N_ELEVATORS; k++ {
 		for i := 0; i < N_FLOORS; i++ {
 			for j := 0; j < N_BUTTONS-1; j++ {
-				SetButtonLamp(ButtonType(j), i, elevatorDataList[k+1].Orders[i][j])
+				if k == 0 {
+					SetButtonLamp(ButtonType(j), i, elevatorDataList[k].Orders[i][j])
+				} else if elevatorDataList[k].Orders[i][j] == 1 && k > 0 {
+					SetButtonLamp(ButtonType(j), i, elevatorDataList[k].Orders[i][j])
+				}
 				SetButtonLamp(ButtonType(2), i, elevatorDataList[0].Orders[i][2])
 			}
 		}
