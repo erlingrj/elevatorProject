@@ -2,7 +2,7 @@ package ElevatorController
 
 import (
 	//"elevatorProject/OrderController"
-	. "elevatorProject/driver"
+	. "elevatorProject/Driver"
 )
 
 func SetAllLights(elevatorDataList [N_ELEVATORS]ElevatorData) {
@@ -82,24 +82,20 @@ func GetNextDirection(elevatorData ElevatorData) ElevatorData {
 
 	case DirnStop:
 
-		if !NoOrdersAtCurrentFloor(elevatorData) {
-			//to stop the elevator from picking up all orders at a floor
-			if !NoOrdersBelowCurrentFloor(elevatorData) {
-				elevatorData.Direction = DirnDown
-			} else if !NoOrdersAboveCurrentFloor(elevatorData) {
-				elevatorData.Direction = DirnUp
-			} else {
-				elevatorData.Direction = DirnStop
-			}
-		} else {
-
+		if NoOrdersAtCurrentFloor(elevatorData) {
 			if NoOrdersBelowCurrentFloor(elevatorData) {
 				elevatorData.Direction = DirnUp
 			} else {
 				elevatorData.Direction = DirnDown
 			}
-		}
 
+		} else if elevatorData.Status != StatusDoorOpen {
+			if elevatorData.Floor != 0 {
+				elevatorData.Direction = DirnDown
+			} else {
+				elevatorData.Direction = DirnUp
+			}
+		}
 	}
 
 end:

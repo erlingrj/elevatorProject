@@ -1,4 +1,4 @@
-package driver
+package Driver
 
 const N_ELEVATORS = 3
 

@@ -1,7 +1,7 @@
 package Timer
 
 import (
-  . "elevatorProject/driver"
+  . "elevatorProject/Driver"
   "time"
 )
 

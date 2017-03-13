@@ -1,11 +1,11 @@
 package EventController
 
 import (
+	. "elevatorProject/Driver"
 	"elevatorProject/ElevatorController"
 	. "elevatorProject/Network/network/peers"
 	"elevatorProject/OrderController"
 	"elevatorProject/Utilities"
-	. "elevatorProject/driver"
 	"fmt"
 )
 
@@ -68,6 +68,7 @@ func ExternalButtonPressed(elevatorDataList [N_ELEVATORS]ElevatorData, order Ele
 }
 
 func LeaveFloor(elevatorDataList [N_ELEVATORS]ElevatorData, updateElevatorTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {
+	elevatorDataList[0].Status = StatusIdle
 	elevatorDataList[0] = ElevatorController.GetNextDirection(elevatorDataList[0])
 	elevatorDataList = ElevatorController.RemoveCompletedOrders(elevatorDataList)
 	SetDoorOpenLamp(0)
@@ -104,13 +105,12 @@ func InternalButtonPressed(elevatorDataList [N_ELEVATORS]ElevatorData, floor int
 }
 
 func ElevatorDataReceivedFromNetwork(elevatorDataRx ElevatorData, elevatorDataList [N_ELEVATORS]ElevatorData, elevatorUpdateTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {
-	fmt.Println("he")
 
 	if elevatorDataRx.ID == elevatorDataList[0].ID && elevatorDataRx.ForceUpdate == true {
 		//Another elevator wants to overwrite our internal order due to network loss
 
 		//Appending internal orders
-		for i := 0; i < N_FLOORS-1; i++ {
+		for i := 0; i < N_FLOORS; i++ {
 			if elevatorDataRx.Orders[i][2] == 1 {
 				elevatorDataList[0].Orders[i][2] = 1
 			}
@@ -118,14 +118,16 @@ func ElevatorDataReceivedFromNetwork(elevatorDataRx ElevatorData, elevatorDataLi
 
 		elevatorDataList[0] = ElevatorController.GetNextDirection(elevatorDataList[0])
 		SetMotorDirection(elevatorDataList[0].Direction)
-
+		fmt.Println("Internal orders from network")
 		//Sending a message back to inform that we have successfully updated our orderqueue
 		elevatorUpdateTxCh <- elevatorDataList[0]
+		elevatorDataList[0].ForceUpdate = false
 
 	} else if elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)].ForceUpdate == true {
 		//We have sent internal orders to this elevator, check if they have been received
+		fmt.Println("Internal orders to other elevator check")
 		check := true
-		for i := 0; i < N_FLOORS-1; i++ {
+		for i := 0; i < N_FLOORS; i++ {
 			if elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)].Orders[i][2] == 1 && elevatorDataRx.Orders[i][2] == 0 {
 				check = false
 			}
@@ -137,10 +139,11 @@ func ElevatorDataReceivedFromNetwork(elevatorDataRx ElevatorData, elevatorDataLi
 			elevatorUpdateTxCh <- elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)]
 		} else {
 			//We have sucessfully delegated the internal orders to the elevator. Update our own verison of elevatorDataRx
+			elevatorDataRx.ForceUpdate = false
 			elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)] = elevatorDataRx
 		}
 	} else if elevatorDataRx.ID != elevatorDataList[0].ID {
-
+		fmt.Println("Other elevator")
 		elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, elevatorDataRx.ID)] = elevatorDataRx
 		//ExternalOrders.UpdateElevatorData(elevatorDataRx)
 	}
@@ -177,18 +180,21 @@ func ElevatorPeerUpdateFromNetwork(elevatorDataList [N_ELEVATORS]ElevatorData, o
 	//Setting all lost elevators to uninitiated, is probably unessecary.Unless two elevators fail at the same instant
 	for i := 0; i < len(onlineElevatorList.Lost); i++ {
 		elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, onlineElevatorList.Lost[i])].Initiated = false
+		fmt.Println("Initialized = false")
 	}
 
 	if onlineElevatorList.New == "" {
+		fmt.Println("Lost elevator")
 		OrderController.RedestributeExternalOrders(elevatorDataList, elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, onlineElevatorList.Lost[len(onlineElevatorList.Lost)-1])], newOrderCh, updateElevatorTxCh)
 	}
 
 	if onlineElevatorList.New != "" {
 		if Utilities.FindElevatorIndex(elevatorDataList, onlineElevatorList.New) == -1 {
+			fmt.Println("New elevator")
 			elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, "")].ID = onlineElevatorList.New
 			elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, onlineElevatorList.New)].Initiated = true
 		} else {
-
+			fmt.Println("New old elevator")
 			elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, onlineElevatorList.New)].Initiated = true
 			//If this elevator already has data stored we want to push those data back
 			if OrderController.HasUnresolvedInternalOrders(elevatorDataList[Utilities.FindElevatorIndex(elevatorDataList, onlineElevatorList.New)]) == true {
@@ -198,7 +204,13 @@ func ElevatorPeerUpdateFromNetwork(elevatorDataList [N_ELEVATORS]ElevatorData, o
 		}
 	}
 
-	if len(onlineElevatorList.Peers) == 1 && len(onlineElevatorList.Lost) > 1 {
+	if elevatorDataList[0].Initiated == false {
+		fmt.Println("Delete external orders")
+		for i := 0; i < N_FLOORS; i++ {
+			elevatorDataList[0].Orders[i][0] = 0
+			elevatorDataList[0].Orders[i][1] = 0
+
+		}
 	}
 	//Lost connection to all other Elevators
 	//Initialize reboot

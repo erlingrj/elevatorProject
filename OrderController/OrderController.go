@@ -2,8 +2,8 @@ package OrderController
 
 import (
 	//	. "elevatorProject/Network/network/peers"
+	. "elevatorProject/Driver"
 	"elevatorProject/Utilities"
-	. "elevatorProject/driver"
 )
 
 func PlaceInternalOrder(elevatorDataList [N_ELEVATORS]ElevatorData, floor int, updateElevatorTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {

@@ -1,9 +1,9 @@
 package Network
 
 import (
+  . "elevatorProject/Driver"
   "elevatorProject/Network/network/bcast"
   "elevatorProject/Network/network/peers"
-  . "elevatorProject/driver"
   //"flag"
   //"os"
   //"strconv"

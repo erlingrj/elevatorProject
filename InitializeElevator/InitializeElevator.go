@@ -1,8 +1,8 @@
 package InitializeElevator
 
 import (
+	. "elevatorProject/Driver"
 	"elevatorProject/Utilities"
-	. "elevatorProject/driver"
 	"fmt"
 	"log"
 	"net"
@@ -92,7 +92,7 @@ func RunPrimaryProcess() {
 
 	// Setting up connection to backup
 	udpBroadcast := DialBroadcastUDP(20100)
-	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("255.255.255.255:%d", 20100))
+	addr, _ := net.ResolveUDPAddr("udp4", fmt.Sprintf("localhost:%d", 20100))
 
 	//Spawning a backup process
 	newBackup := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run main.go")

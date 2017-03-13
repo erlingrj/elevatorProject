@@ -2,7 +2,7 @@ package Utilities
 
 import (
 	//. "elevatorProject/Network/network/peers"
-	. "elevatorProject/driver"
+	. "elevatorProject/Driver"
 	"fmt"
 	"net"
 )
@@ -43,7 +43,6 @@ func GetMacAddr() string {
 }
 
 func PrintOrderList(elevatorDataList [N_ELEVATORS]ElevatorData) {
-
 	fmt.Printf("		UP		DOWN		INTERNAL \n")
 	fmt.Printf("-------------------------------------------------------------\n")
 	for i := 0; i < N_FLOORS; i++ {
