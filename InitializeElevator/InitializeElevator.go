@@ -13,11 +13,9 @@ import (
 )
 
 func InitializeElevator() ElevatorData {
-	//sett heisen i en etasje
-	//oppdater structen.
-	//sett initialisert til true
 	InitElevator()
-
+	
+	//drive the elevator to a floor
 	if GetFloorSensorSignal() == -1 {
 		SetMotorDirection(DirnUp)
 		for GetFloorSensorSignal() == -1 {
@@ -25,7 +23,8 @@ func InitializeElevator() ElevatorData {
 		SetMotorDirection(DirnStop)
 	}
 	var initializedData ElevatorData
-
+	
+	//update the elevatorData
 	initializedData.ID = Utilities.GetMacAddr()
 	initializedData.Floor = GetFloorSensorSignal()
 	initializedData.Direction = GetMotorDirection()
@@ -63,7 +62,7 @@ func RunBackupProcess() {
 	buffer := make([]byte, 1024)
 
 	for i := 0; i < 3; {
-		//Need to set a read deadline for the UDP
+		//Set a read deadline for the UDP
 		t := time.Now()
 		udpListen.SetDeadline(t.Add(10 * time.Millisecond))
 		_, udpshit, err := udpListen.ReadFrom(buffer[:])
@@ -80,7 +79,6 @@ func RunBackupProcess() {
 		}
 	}
 	//Lost conneciton to primary.
-
 	//Close connection and take over as primary
 	udpListen.Close()
 
