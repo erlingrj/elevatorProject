@@ -15,7 +15,7 @@ func ArriveAtFloor(elevatorDataList [N_ELEVATORS]ElevatorData, floor int, startT
 		//We have left a floor, starting timer
 		startTimer <- TimerType(TimeToReachFloor)
 	} else {
-
+		//We have reached a floor, stop timer
 		startTimer <- TimerType(TimeFloorReached)
 		SetFloorIndicator(floor)
 		elevatorDataList[0].Floor = floor
