@@ -16,10 +16,10 @@ func PlaceInternalOrder(elevatorDataList [N_ELEVATORS]ElevatorData, floor int, u
 func PlaceExternalOrder(elevatorDataList [N_ELEVATORS]ElevatorData, order ElevatorOrder, newOrderTxCh chan ElevatorOrder, updateElevatorTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {
 	order.ElevatorID = FindBestElevator(elevatorDataList, order)
 	if order.ElevatorID == elevatorDataList[0].ID {
-		//Oppdaterer egne ordreliste
+		//updates own order list
 		elevatorDataList[0].Orders[order.Floor][order.Direction] = 1
 
-		//Sender oppdatert informasjon på nettverket
+		//sends updated info to the network
 		updateElevatorTxCh <- elevatorDataList[0]
 
 	} else {
