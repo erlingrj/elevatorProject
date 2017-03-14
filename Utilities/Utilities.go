@@ -1,12 +1,12 @@
 package Utilities
 
 import (
-	//. "elevatorProject/Network/network/peers"
 	. "elevatorProject/Driver"
 	"fmt"
 	"net"
 )
 
+//decides a master elevator for distribution based on ID
 func AmIMaster(elevatorDataList [N_ELEVATORS]ElevatorData) bool {
 	for i := 1; i < len(elevatorDataList); i++ {
 		if elevatorDataList[i].Initiated == true && elevatorDataList[i].ID > elevatorDataList[0].ID {
@@ -28,7 +28,6 @@ func GetMacAddr() string {
 
 	}
 	// extract the hardware information base on the interface name
-	// capture above
 	netInterface, err := net.InterfaceByName(currentNetworkHardwareName)
 
 	if err != nil {
@@ -64,6 +63,7 @@ func PrintOrderList(elevatorDataList [N_ELEVATORS]ElevatorData) {
 
 }
 
+//retrieves elevatorIndex in array based on ID
 func FindElevatorIndex(elevatorDataList [N_ELEVATORS]ElevatorData, elevatorID string) int {
 	index := -1
 	for i := 0; i < N_ELEVATORS; i++ {
