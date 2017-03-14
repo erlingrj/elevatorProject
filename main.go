@@ -1,15 +1,12 @@
 package main
 
-//legg filene i GOPATH/src (finn ved å skrive go env i terminal.)
 
 import (
 	"fmt"
-	//"elevatorProject/ElevatorController"
 	"elevatorProject/EventController"
 	"elevatorProject/InitializeElevator"
 	"elevatorProject/Network"
 	. "elevatorProject/Network/network/peers"
-	//"elevatorProject/OrderController"
 	. "elevatorProject/Driver"
 	"elevatorProject/Timer"
 	"elevatorProject/Utilities"
