@@ -6,7 +6,6 @@ import (
 	. "elevatorProject/Network/network/peers"
 	"elevatorProject/OrderController"
 	"elevatorProject/Utilities"
-	"fmt"
 )
 
 func ArriveAtFloor(elevatorDataList [N_ELEVATORS]ElevatorData, floor int, startTimer chan TimerType, updateElevatorTxCh chan ElevatorData) [N_ELEVATORS]ElevatorData {

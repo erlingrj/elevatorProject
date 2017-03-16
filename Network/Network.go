@@ -1,32 +1,31 @@
 package Network
 
 import (
-  "heisprosjekt/Network/network/bcast"
-  "heisprosjekt/Network/network/peers"
-  . "heisprosjekt/driver"
-  //"flag"
-  //"os"
-  //"strconv"
+	. "elevatorProject/Driver"
+	"elevatorProject/Network/network/bcast"
+	"elevatorProject/Network/network/peers"
+	//"flag"
+	//"os"
+	//"strconv"
 )
 
 func RunNetwork(elevatorData ElevatorData, updateTxCh chan ElevatorData, updateRxCh chan ElevatorData, orderTxCh chan ElevatorOrder, orderRxCh chan ElevatorOrder, peerUpdateCh chan peers.PeerUpdate, peerTxEnable chan bool) {
-  // First we need to asssign an ID to the elevator. We assume
-  // That there can only be N_ELEV elevators at any time
+	// First we need to asssign an ID to the elevator. We assume
+	// That there can only be N_ELEV elevators at any time
 
-  go peers.Transmitter(15247, elevatorData.ID, peerTxEnable)
-  go peers.Receiver(15247, peerUpdateCh)
+	go peers.Transmitter(15247, elevatorData.ID, peerTxEnable)
+	go peers.Receiver(15247, peerUpdateCh)
 
-  //We initialize contact. Lets wait 5secs (or until all elevators
-  // are up and running
+	//We initialize contact. Lets wait 5secs (or until all elevators
+	// are up and running
 
-  go bcast.Transmitter(18569, updateTxCh)
-  go bcast.Receiver(18569, updateRxCh)
+	go bcast.Transmitter(18569, updateTxCh)
+	go bcast.Receiver(18569, updateRxCh)
 
-  go bcast.Transmitter(11568, orderTxCh)
-  go bcast.Receiver(11568, orderRxCh)
+	go bcast.Transmitter(11568, orderTxCh)
+	go bcast.Receiver(11568, orderRxCh)
 
-  select {
-  }
+	select {}
 }
 
 /*
